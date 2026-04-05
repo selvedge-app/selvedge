@@ -12,7 +12,7 @@ export function StagePipeline({
   const currentIdx = STAGE_ORDER.indexOf(currentStage);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 overflow-x-auto pb-1">
       {STAGE_ORDER.filter((s) => s !== "ARCHIVED").map((stage, idx) => {
         const isActive = idx === currentIdx;
         const isCompleted = idx < currentIdx;
@@ -23,7 +23,7 @@ export function StagePipeline({
             key={stage}
             disabled={!isClickable}
             onClick={() => isClickable && onAdvance(stage)}
-            className={`flex-1 rounded-md px-2 py-1.5 text-xs font-medium text-center transition-colors ${
+            className={`flex-1 min-w-[5rem] rounded-md px-2 py-1.5 text-xs font-medium text-center transition-colors ${
               isActive
                 ? "bg-gray-900 text-white"
                 : isCompleted
