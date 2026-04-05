@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  DESIGNER
+  DEVELOPER
+  MERCHANDISER
+  PRODUCTION_MANAGER
+  SALES
+  VIEWER
+}
+
+enum Stage {
+  CONCEPTION
+  DEVELOPMENT
+  PROTOTYPING
+  MERCHANDISING
+  PRODUCTION
+  DELIVERY
+  SALES
+  ARCHIVED
+}
+
+enum Category {
+  TOPS
+  BOTTOMS
+  DRESSES
+  OUTERWEAR
+  ACCESSORIES
+  FOOTWEAR
+  OTHER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String
+  role      Role     @default(VIEWER)
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products   Product[]
+  activities Activity[]
+  comments   Comment[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  sku         String?  @unique
+  description String?
+  category    Category @default(OTHER)
+  season      String?
+  collection  String?
+  stage       Stage    @default(CONCEPTION)
+  imageUrls   String[] @default([])
+  materials   String?
+  colorway    String?
+  targetPrice Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+  createdById String?
+
+  activities Activity[]
+  comments   Comment[]
+
+  @@index([stage])
+  @@index([collection])
+  @@index([season])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // e.g. "stage_change", "edit", "comment"
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@index([productId])
+}
